@@ -1,16 +1,16 @@
 puts "Введите длину стороны a"
-a = gets.chomp.to_i
+a = gets.chomp.to_f
 
 puts "Введите длину стороны b"
-b = gets.chomp.to_i
+b = gets.chomp.to_f
 
 puts "Введите длину стороны с"
-c = gets.chomp.to_i
+c = gets.chomp.to_f
 
 sides = [a, b, c]
 
 hypothenuse = sides.max
-sides.delete_at(sides.index hypothenuse)
+sides.delete_at(sides.index(hypothenuse))
 
 cathet1 = sides[0]
 cathet2 = sides[1]
