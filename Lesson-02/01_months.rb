@@ -13,6 +13,6 @@ months_2018 = {
   december: 31
 }
 
-for month, days in months_2018 do
+months_2018.each do |month, days|
   puts month if days == 30
 end

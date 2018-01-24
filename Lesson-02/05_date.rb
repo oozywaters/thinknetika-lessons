@@ -16,9 +16,7 @@ number_of_days = [31, (leap_year?(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 
 is_correct_date = number_of_days[month] && day > 0 && day <= number_of_days[month]
 
 if is_correct_date
-  number_of_days.each_with_index do |n, index|
-    days_count += n if index < month
-  end
+  number_of_days.first(month).each { |n| days_count += n}
   days_count += day
   month_str = (month + 1).to_s.rjust(2, '0')
   puts "#{day}.#{month_str}.#{year} - это #{days_count}-й день в году"
