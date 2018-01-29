@@ -34,8 +34,8 @@ class Train
   end
 
   def set_route(route)
-    self.current_station.send_train(self) if @route
     if route.class == Route
+      self.current_station.send_train(self) if @route
       @route = route
       go_to_station(0)
     end
