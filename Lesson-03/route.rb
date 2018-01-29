@@ -1,9 +1,7 @@
 class Route
   attr_reader :stations
 
-  def initialize(starting_station = 'Starting Station', end_station = 'End Station')
-    @starting_station = starting_station
-    @end_station = end_station
+  def initialize(starting_station, end_station)
     @stations = [starting_station, end_station]
   end
 
@@ -12,6 +10,8 @@ class Route
   end
 
   def remove_station(station)
-    @stations.delete(station) if station != @starting_station && station != @end_station
+    station_index = @stations.index(station)
+    # Can't remove staring and ending stations
+    @stations.delete(station) if station_index != @stations.size - 1 && station_index != 0
   end
 end
