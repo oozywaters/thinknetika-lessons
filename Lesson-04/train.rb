@@ -1,10 +1,10 @@
 class Train
-  attr_reader :speed, :type, :wagons_qty
+  attr_reader :speed, :type, :wagons
 
-  def initialize(number, type = 'passenger', wagons_qty = 0)
+  def initialize(number, type = 'passenger')
     @number = number
     @type = type
-    @wagons_qty = wagons_qty
+    @wagons = []
     @speed = 0
     @current_station_index = 0
   end
@@ -23,12 +23,12 @@ class Train
     self.speed = 0
   end
 
-  def add_wagon
-    @wagons_qty += 1 if speed.zero?
+  def add_wagon(wagon)
+    @wagons << wagon if wagon.is_a? Wagon
   end
 
-  def remove_wagon
-    @wagons_qty -= 1 if speed.zero? && wagons_qty > 0
+  def remove_wagon(wagon)
+    @wagons.delete(wagon)
   end
 
   def set_route(route)
@@ -55,19 +55,22 @@ class Train
     @route.stations[@current_station_index] if @route
   end
 
-  def go_to_station(index)
-    if stations && stations[index] && index >= 0
-      self.current_station.send_train(self)
-      stations[index].accept_train(self)
-      @current_station_index = index
-    end
-  end
-
   def go_to_next_station
     go_to_station(@current_station_index + 1)
   end
 
   def go_to_previous_station
     go_to_station(@current_station_index - 1)
+  end
+
+  protected
+
+  # нельзя перемещать вагон более чем на одну станцию вперед/назад
+  def go_to_station(index)
+    if stations && stations[index] && index >= 0
+      self.current_station.send_train(self)
+      stations[index].accept_train(self)
+      @current_station_index = index
+    end
   end
 end
