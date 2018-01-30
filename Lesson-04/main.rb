@@ -61,55 +61,97 @@ class App
   end
 
   def display_route_menu
-    puts 'Routes'
+    puts 'Routes Menu'
     puts '1) Add route'
     puts '2) Edit routes' unless @routes.empty?
     puts '0) Back to Main Menu'
     choice = gets.chomp.to_i
     case choice
       when 0 then display_main_menu
-      when 1 then display_add_route_menu
-      when 2
-        if @routes.empty?
-          puts 'There are no routes to edit yet'
-          display_route_menu
-        else
-          display_edit_routes_menu
-        end
+      when 1 then create_route
+      when 2 then display_edit_routes_menu
       else
         puts 'There is no such option'
         display_route_menu
     end
   end
 
-  def display_add_route_menu
-    puts 'Select starting station'
-    @stations.each_with_index { |item, index| puts "#{index}) #{item.name}" }
-    starting_station = @stations[gets.chomp.to_i]
-    if starting_station
-      puts 'Select ending station'
-      ending_stations = @stations.reject(starting_station)
-      ending_stations.each_with_index { |item, index| puts "#{index}) #{item.name}" }
-      end_station = ending_stations[gets.chomp.to_i]
-      return display_add_route_menu unless end_station
-      @routes << Route.new(starting_station, end_station)
-      display_route_menu
-    else
-      puts 'There is no such station'
-      display_add_route_menu
+  def create_route
+    puts 'Select starting station:'
+    starting_station = choose_station
+    puts 'Select ending station:'
+    rest_of_stations = @stations.reject { |item| item == starting_station }
+    ending_station = choose_station(rest_of_stations)
+    @routes << Route.new(starting_station, ending_station)
+    puts "Route '#{starting_station.name} - #{ending_station.name}' was created."
+    display_route_menu
+  end
+
+  def choose_route(routes = @routes)
+    unless routes.empty?
+      routes.each_with_index do |item, index|
+        puts "#{index}) #{item.name}"
+      end
+      selected_route = routes[gets.chomp.to_i]
+      if !selected_route
+        puts 'There is no such route. Please, try again'
+        choose_route(routes)
+      else
+        selected_route
+      end
     end
   end
 
-  def display_routes_list
-    @routes.each_with_index do |item, index|
-      stations = item.stations.collect { |station| station.name }
-      puts "#{index}) #{stations.join(', ')}"
+  def choose_station(stations = @stations)
+    unless stations.empty?
+      stations.each_with_index { |item, index| puts "#{index}) #{item.name}" }
+      selected_station = stations[gets.chomp.to_i]
+      if !selected_station
+        puts 'There is no such station. Please, try again.'
+        choose_station(stations)
+      else
+        selected_station
+      end
     end
   end
 
   def display_edit_routes_menu
     puts 'Select route to edit'
-    display_routes_list
+    selected_route = choose_route
+    puts 'Select option:'
+    puts '1) Add station'
+    puts '2) Remove station'
+    choice = gets.chomp.to_i
+    case choice
+      when 1 then add_stations_to_route(selected_route)
+      when 2 then remove_stations_from_route(selected_route)
+      else
+        display_route_menu
+    end
+  end
+
+  def add_stations_to_route(route)
+    stations_to_add = @stations - route.stations
+    if stations_to_add.empty?
+      puts 'There are no stations to add. Please, create one.'
+    else
+      selected_station = choose_station(stations_to_add)
+      route.add_station(selected_station)
+      puts "Station #{selected_station.name} was added to '#{route.name}' route"
+    end
+    display_route_menu
+  end
+
+  def remove_stations_from_route(route)
+    if route.way_stations.empty?
+      puts 'There are no routes to remove.'
+      display_edit_routes_menu
+    else
+      selected_station = choose_station(route.way_stations)
+      route.remove_station(selected_station)
+      puts "Station #{selected_station.name} was removed from '#{route.name}' route"
+      display_route_menu
+    end
   end
 
   def display_main_menu
