@@ -71,8 +71,8 @@ class App
         '0' => {
           name: 'Back to Main Menu',
           action: :display_main_menu
-        },
-      },
+        }
+      }
     }
 
     @routes_menu = {
@@ -116,8 +116,9 @@ class App
           name: 'Exit',
           action: :exit
         }
-      },
+      }
     }
+
   end
 
   def run
@@ -142,12 +143,12 @@ class App
   def show_stations
     if stations.empty?
       puts 'There is no stations yet. Please, add one.'
-      display_menu(@stations_menu)
     else
       puts 'Select station to view'
-      selected_station = choose_station
-      puts "#{selected_station.name} station, trains: #{selected_station.trains}"
+      selected_station = choose_item_from_array(@stations)
+      puts "#{selected_station.name} station, trains: #{selected_station.trains.map(&:name)}"
     end
+    display_menu(@stations_menu)
   end
 
   def move_train
@@ -181,7 +182,7 @@ class App
   end
 
   def add_train(type)
-    puts "Enter Train Number"
+    puts 'Enter Train Number'
     train_number = gets.chomp
     new_train = type == 'cargo' ? CargoTrain.new(train_number) : PassengerTrain.new(train_number)
     @trains << new_train
@@ -254,12 +255,28 @@ class App
   def edit_route
     if @routes.empty?
       puts 'There are no routes to edit. Please, create one.'
+      display_menu(@routes_menu)
     else
-      puts 'Select route to edit:'
+      puts 'Select route to edit'
       selected_route = choose_item_from_array(@routes)
-      puts route
+      display_edit_routes_menu(selected_route)
     end
-    display_menu(@routes_menu)
+  end
+
+  def display_edit_routes_menu(route)
+    puts 'Select option:'
+    puts '1) Add Station'
+    puts '2) Remove Station'
+    puts '0) Back to Stations Menu'
+    choice = gets.chomp.to_i
+    case choice
+      when 1 then add_stations_to_route(route)
+      when 2 then remove_stations_from_route(route)
+      when 0 then display_menu(@stations_menu)
+      else
+        puts 'There is no such option. Please, try again'
+        display_edit_routes_menu(route)
+    end
   end
 
   def remove_route
@@ -317,25 +334,10 @@ class App
     end
   end
 
-  def display_edit_routes_menu
-    puts 'Select route to edit'
-    selected_route = choose_item_from_array(@routes)
-    puts 'Select option:'
-    puts '1) Add station'
-    puts '2) Remove station'
-    choice = gets.chomp.to_i
-    case choice
-      when 1 then add_stations_to_route(selected_route)
-      when 2 then remove_stations_from_route(selected_route)
-      else
-        display_route_menu
-    end
-  end
-
   def add_stations_to_route(route)
     stations_to_add = @stations - route.stations
     if stations_to_add.empty?
-      puts 'There are no stations to add. Please, create one.'
+      puts 'There are no stations to add. Please, create more stations.'
     else
       selected_station = choose_item_from_array(stations_to_add)
       route.add_station(selected_station)
@@ -346,14 +348,13 @@ class App
 
   def remove_stations_from_route(route)
     if route.way_stations.empty?
-      puts 'There are no routes to remove.'
-      display_edit_routes_menu
+      puts "There are no stations to remove in '#{route.name}' route"
     else
       selected_station = choose_item_from_array(route.way_stations)
       route.remove_station(selected_station)
       puts "Station #{selected_station.name} was removed from '#{route.name}' route"
-      display_route_menu
     end
+    display_menu(@routes_menu)
   end
 
   def display_menu(menu)

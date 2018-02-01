@@ -7,7 +7,7 @@ class Station
   end
 
   def accept_train(train)
-    @trains.push(train) if train.class == Train
+    @trains.push(train)
   end
 
   def send_train(train)
