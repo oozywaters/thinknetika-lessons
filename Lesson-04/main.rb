@@ -6,33 +6,12 @@ require_relative 'station'
 require_relative 'route'
 
 class App
-  attr_reader :stations, :trains
+  attr_reader :stations, :trains, :main_menu
 
   def initialize
     @stations = [Station.new('Vnukovo'), Station.new('Belorusskaya')]
     @routes = [Route.new(@stations[0], @stations[1])]
     @trains = []
-
-    @main_menu = {
-      title: 'Main Menu',
-      items: {
-        '1' => {
-          name: 'Stations',
-          action: :display_stations_menu
-        },
-        '2' => {
-          name: 'Trains',
-          action: :display_trains_menu
-        },
-        '3' => {
-          name: 'Routes',
-        },
-        '0' => {
-          name: 'Exit',
-          action: :exit
-        }
-      },
-    }
 
     @stations_menu = {
       title: 'Stations Menu',
@@ -52,12 +31,26 @@ class App
       }
     }
 
+    @add_train_menu = {
+      title: 'Choose a Type of Train',
+      items: {
+        '1' => {
+          name: 'Passenger',
+          action: [:add_train, 'passenger']
+        },
+        '2' => {
+          name: 'Cargo',
+          action: [:add_train, 'cargo']
+        }
+      }
+    }
+
     @trains_menu = {
       title: 'Trains Menu',
       items: {
         '1' => {
           name: 'Add Train',
-          action: :add_train
+          action: [:display_menu, @add_train_menu]
         },
         '2' => {
           name: 'Assign Route to Train',
@@ -81,6 +74,50 @@ class App
         },
       },
     }
+
+    @routes_menu = {
+      title: 'Routes Menu',
+      items: {
+        '1' => {
+          name: 'Add Route',
+          action: :add_route
+        },
+        '2' => {
+          name: 'Edit Route',
+          action: :edit_route
+        },
+        '3' => {
+          name: 'Remove Route',
+          action: :remove_route
+        },
+        '0' => {
+          name: 'Back to Main Menu',
+          action: :display_main_menu
+        }
+      }
+    }
+
+    @main_menu = {
+      title: 'Main Menu',
+      items: {
+        '1' => {
+          name: 'Stations',
+          action: [:display_menu, @stations_menu]
+        },
+        '2' => {
+          name: 'Trains',
+          action: [:display_menu, @trains_menu]
+        },
+        '3' => {
+          name: 'Routes',
+          action: [:display_menu, @routes_menu]
+        },
+        '0' => {
+          name: 'Exit',
+          action: :exit
+        }
+      },
+    }
   end
 
   def run
@@ -95,7 +132,7 @@ class App
     if !stations.detect { |item| item.name == station_name }
       stations << Station.new(station_name)
       puts "Station '#{station_name}' was added"
-      display_stations_menu
+      display_menu(@stations_menu)
     else
       puts 'There is a station with such name. Please, try again.'
       add_station
@@ -105,30 +142,12 @@ class App
   def show_stations
     if stations.empty?
       puts 'There is no stations yet. Please, add one.'
-      display_stations_menu
+      display_menu(@stations_menu)
     else
       puts 'Select station to view'
       selected_station = choose_station
-      puts "#{selected_station.name}: #{selected_station.trains}"
+      puts "#{selected_station.name} station, trains: #{selected_station.trains}"
     end
-  end
-
-  def add_train
-    puts 'Choose a type of train'
-    puts '1) Passenger'
-    puts '2) Cargo'
-    choice = gets.chomp.to_i
-    type = ''
-    case choice
-      when 1
-        type = 'passenger'
-      when 2
-        type = 'cargo'
-      else
-        puts 'There is no such type of train. Please, try again.'
-        return add_train
-    end
-    set_train_number(type)
   end
 
   def move_train
@@ -144,7 +163,7 @@ class App
         puts "#{selected_train.name} train has no assigned route"
       end
     end
-    display_trains_menu
+    display_menu(@trains_menu)
   end
 
   def select_train_destination(train)
@@ -161,13 +180,13 @@ class App
     end
   end
 
-  def set_train_number(type)
-    puts "What's a train number?"
+  def add_train(type)
+    puts "Enter Train Number"
     train_number = gets.chomp
     new_train = type == 'cargo' ? CargoTrain.new(train_number) : PassengerTrain.new(train_number)
     @trains << new_train
     puts "#{type.capitalize} train ##{train_number} was added"
-    display_trains_menu
+    display_menu(@trains_menu)
   end
 
   def assign_route_to_train
@@ -183,7 +202,7 @@ class App
       selected_train.set_route(selected_route)
       puts "#{selected_route.name} Route was successfully Assigned to #{selected_train.name} Train"
     end
-    display_trains_menu
+    display_menu(@trains_menu)
   end
 
   def add_wagons_to_train
@@ -196,13 +215,12 @@ class App
       selected_train.add_wagon(new_wagon)
       puts "#{new_wagon.name.capitalize} wagon was successfully added to #{selected_train.name} train"
     end
-    display_trains_menu
+    display_menu(@trains_menu)
   end
 
   def remove_wagons_from_train
     if @trains.empty?
       puts 'There are no trains yet. Please, add one.'
-      display_trains_menu
     else
       puts 'Select Train'
       selected_train = choose_item_from_array(@trains)
@@ -215,34 +233,45 @@ class App
         puts "#{selected_wagon.name.capitalize} wagon was successfully removed from #{selected_train.name} train"
       end
     end
-    display_trains_menu
+    display_menu(@trains_menu)
   end
 
-  def display_route_menu
-    puts 'Routes Menu'
-    puts '1) Add route'
-    puts '2) Edit routes' unless @routes.empty?
-    puts '0) Back to Main Menu'
-    choice = gets.chomp.to_i
-    case choice
-      when 0 then display_main_menu
-      when 1 then create_route
-      when 2 then display_edit_routes_menu
-      else
-        puts 'There is no such option'
-        display_route_menu
+  def add_route
+    if @stations.size < 2
+      puts 'There are not enough stations to create a route'
+    else
+      puts 'Select starting station:'
+      starting_station = choose_item_from_array(@stations)
+      puts 'Select ending station:'
+      rest_of_stations = @stations.reject { |item| item == starting_station }
+      ending_station = choose_item_from_array(rest_of_stations)
+      @routes << Route.new(starting_station, ending_station)
+      puts "Route '#{starting_station.name} - #{ending_station.name}' was created."
     end
+    display_menu(@routes_menu)
   end
 
-  def create_route
-    puts 'Select starting station:'
-    starting_station = choose_item_from_array(@stations)
-    puts 'Select ending station:'
-    rest_of_stations = @stations.reject { |item| item == starting_station }
-    ending_station = choose_station(rest_of_stations)
-    @routes << Route.new(starting_station, ending_station)
-    puts "Route '#{starting_station.name} - #{ending_station.name}' was created."
-    display_route_menu
+  def edit_route
+    if @routes.empty?
+      puts 'There are no routes to edit. Please, create one.'
+    else
+      puts 'Select route to edit:'
+      selected_route = choose_item_from_array(@routes)
+      puts route
+    end
+    display_menu(@routes_menu)
+  end
+
+  def remove_route
+    if @routes.empty?
+      puts 'There are no routes to delete.'
+    else
+      puts 'Select route to delete:'
+      selected_route = choose_item_from_array(@routes)
+      @routes.delete(selected_route)
+      puts "Route '#{selected_route.name}' was deleted"
+    end
+    display_menu(@routes_menu)
   end
 
   def choose_item_from_array(items)
@@ -271,19 +300,6 @@ class App
         choose_route(routes)
       else
         selected_route
-      end
-    end
-  end
-
-  def choose_station(stations = @stations)
-    unless stations.empty?
-      stations.each_with_index { |item, index| puts "#{index}) #{item.name}" }
-      selected_station = stations[gets.chomp.to_i]
-      if !selected_station
-        puts 'There is no such station. Please, try again.'
-        choose_station(stations)
-      else
-        selected_station
       end
     end
   end
@@ -325,7 +341,7 @@ class App
       route.add_station(selected_station)
       puts "Station #{selected_station.name} was added to '#{route.name}' route"
     end
-    display_route_menu
+    display_menu(@routes_menu)
   end
 
   def remove_stations_from_route(route)
@@ -347,7 +363,7 @@ class App
     end
     menu_item = menu[:items][gets.chomp]
     if menu_item && menu_item[:action]
-      send(menu_item[:action])
+      send(*menu_item[:action])
     else
       puts 'There is no such option. Please, try again.'
       display_menu(menu)
@@ -356,14 +372,6 @@ class App
 
   def display_main_menu
     display_menu(@main_menu)
-  end
-
-  def display_stations_menu
-    display_menu(@stations_menu)
-  end
-
-  def display_trains_menu
-    display_menu(@trains_menu)
   end
 
   def exit
