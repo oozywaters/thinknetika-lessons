@@ -28,7 +28,7 @@ class Train
   end
 
   def add_wagon(wagon)
-    @wagons << wagon if wagon.is_a? Wagon
+    @wagons << wagon
   end
 
   def remove_wagon(wagon)
@@ -36,11 +36,10 @@ class Train
   end
 
   def set_route(route)
-    if route.class == Route
-      self.current_station.send_train(self) if @route
-      @route = route
-      go_to_station(0)
-    end
+    return unless route.is_a? Route
+    current_station.send_train(self) if @route
+    @route = route
+    go_to_station(0)
   end
 
   def stations
@@ -72,7 +71,7 @@ class Train
   # нельзя перемещать вагон более чем на одну станцию вперед/назад
   def go_to_station(index)
     if stations && stations[index] && index >= 0
-      self.current_station.send_train(self)
+      current_station.send_train(self)
       stations[index].accept_train(self)
       @current_station_index = index
     end
