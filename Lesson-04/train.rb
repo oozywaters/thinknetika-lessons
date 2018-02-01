@@ -1,5 +1,5 @@
 class Train
-  attr_reader :speed, :type, :wagons
+  attr_reader :speed, :type, :wagons, :number, :route
 
   def initialize(number, type = 'passenger')
     @number = number
@@ -7,6 +7,10 @@ class Train
     @wagons = []
     @speed = 0
     @current_station_index = 0
+  end
+
+  def name
+    "#{type.capitalize} ##{number}"
   end
 
   def accelerate(amount = 30)
