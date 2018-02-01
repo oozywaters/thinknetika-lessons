@@ -358,10 +358,8 @@ class App
   end
 
   def display_menu(menu)
-    if menu
-      puts menu[:title]
-      menu[:items].each { |item| puts "#{item[0]}) #{item[1][:name]}" }
-    end
+    puts menu[:title]
+    menu[:items].each { |item| puts "#{item[0]}) #{item[1][:name]}" }
     menu_item = menu[:items][gets.chomp]
     if menu_item && menu_item[:action]
       send(*menu_item[:action])
