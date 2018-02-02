@@ -8,7 +8,7 @@ require_relative 'station'
 require_relative 'route'
 
 class App
-  attr_reader :stations, :trains, :main_menu
+  attr_reader :stations, :trains
 
   STATIONS_MENU = {
     title: 'Stations Menu',
