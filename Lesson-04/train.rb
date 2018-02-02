@@ -70,10 +70,9 @@ class Train
 
   # нельзя перемещать вагон более чем на одну станцию вперед/назад
   def go_to_station(index)
-    if stations && stations[index] && index >= 0
-      current_station.send_train(self)
-      stations[index].accept_train(self)
-      @current_station_index = index
-    end
+    return unless stations && stations[index] && index >= 0
+    current_station.send_train(self)
+    stations[index].accept_train(self)
+    @current_station_index = index
   end
 end

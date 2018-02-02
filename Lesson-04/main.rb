@@ -165,18 +165,19 @@ class App
     display_menu(STATIONS_MENU)
   end
 
+  def handle_move_train(train)
+    return puts "#{train.name} train has no assigned route" unless train.route
+    select_train_destination(train)
+    puts "#{train.name} train is now at #{train.current_station.name} station"
+  end
+
   def move_train
     if @trains.empty?
       puts 'There are no trains to move. Please, create one.'
     else
       puts 'Select Train to move'
       selected_train = choose_item_from_array(@trains)
-      if selected_train.route
-        select_train_destination(selected_train)
-        puts "#{selected_train.name} train is now at #{selected_train.current_station.name} station"
-      else
-        puts "#{selected_train.name} train has no assigned route"
-      end
+      handle_move_train(selected_train)
     end
     display_menu(TRAINS_MENU)
   end
@@ -240,16 +241,17 @@ class App
     else
       puts 'Select Train'
       selected_train = choose_item_from_array(@trains)
-      if selected_train.wagons.empty?
-        puts "#{selected_train.name.capitalize} train has no wagons"
-      else
-        puts 'Select wagon to remove'
-        selected_wagon = choose_item_from_array(selected_train.wagons)
-        selected_train.remove_wagon(selected_wagon)
-        puts "#{selected_wagon.name.capitalize} wagon was successfully removed from #{selected_train.name} train"
-      end
+      handle_remove_wagons(selected_train)
     end
     display_menu(TRAINS_MENU)
+  end
+
+  def handle_remove_wagons(train)
+    return puts "#{train.name.capitalize} train has no wagons" if train.wagons.empty?
+    puts 'Select wagon to remove'
+    selected_wagon = choose_item_from_array(train.wagons)
+    train.remove_wagon(selected_wagon)
+    puts "#{selected_wagon.name.capitalize} wagon was successfully removed from #{train.name} train"
   end
 
   def add_route
@@ -317,34 +319,6 @@ class App
       choose_item_from_array(items)
     else
       selected_item
-    end
-  end
-
-  def choose_route(routes = @routes)
-    unless routes.empty?
-      routes.each_with_index do |item, index|
-        puts "#{index}) #{item.name}"
-      end
-      selected_route = routes[gets.chomp.to_i]
-      if !selected_route
-        puts 'There is no such route. Please, try again'
-        choose_route(routes)
-      else
-        selected_route
-      end
-    end
-  end
-
-  def choose_train(trains = @trains)
-    unless trains.empty?
-      trains.each_with_index { |item, index| puts "#{index + 1}) #{item.type} ##{item.number}" }
-      selected_train = trains[gets.chomp.to_i - 1]
-      if !selected_train
-        puts 'There is no such train. Please, try again.'
-        choose_train
-      else
-        selected_train
-      end
     end
   end
 
