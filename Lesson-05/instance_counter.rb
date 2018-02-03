@@ -2,6 +2,7 @@ module InstanceCounter
   def self.included(base)
     base.extend ClassMethods
     base.send :include, InstanceMethods
+    base.instance_variable_set(:@instances, [])
   end
 
   module InstanceMethods
@@ -13,15 +14,14 @@ module InstanceCounter
   end
 
   module ClassMethods
-    @@instances = []
     def instances
-      @@instances.length
+      @instances.length
     end
 
     private
 
     def add_instance(instance)
-      @@instances << instance
+      @instances << instance
     end
   end
 end

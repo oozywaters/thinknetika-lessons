@@ -1,16 +1,24 @@
 class Station
   attr_reader :trains, :name
+  @instances = []
 
-  @@instances = []
+  class << self
+    def all
+      # dup to prevent @instances from modifying
+      @instances.dup
+    end
 
-  def self.all
-    @@instances
+    private
+
+    def register_instance(instance)
+      @instances << instance
+    end
   end
 
   def initialize(station_name)
     @name = station_name
     @trains = []
-    @@instances += [self]
+    self.class.send :register_instance, self
   end
 
   def accept_train(train)
