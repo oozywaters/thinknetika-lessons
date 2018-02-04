@@ -35,8 +35,9 @@ class Station
   protected
 
   def validate!
-    raise 'Station name cannot be nil' if @name.nil?
-    raise 'Station name has wrong format' if @name !~ NAME_FORMAT
+    raise 'Station name cannot be nil.' if @name.nil?
+    raise 'Station name has wrong format.' if @name !~ NAME_FORMAT
+    raise 'There is a station with such name.' if @@stations.detect { |item| item.name == @name }
     true
   end
 end

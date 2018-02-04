@@ -8,7 +8,7 @@ require_relative 'station'
 require_relative 'route'
 
 class App
-  attr_reader :stations, :trains
+  attr_reader :trains
 
   STATIONS_MENU = {
     title: 'Stations Menu',
@@ -117,7 +117,6 @@ class App
   }
 
   def initialize
-    @stations = []
     @routes = []
     @trains = []
   end
@@ -128,11 +127,13 @@ class App
   end
 
   def seed_stations
-    @stations += [Station.new('Vnukovo'), Station.new('Belorusskaya')]
+    Station.new('Vnukovo')
+    Station.new('Belorusskaya')
   end
 
   def seed_routes
-    @routes += [Route.new(@stations[0], @stations[1])]
+    stations = Station.all
+    @routes << Route.new(stations[0], stations[1]) if stations.size >= 2
   end
 
   def run
@@ -144,22 +145,21 @@ class App
   def add_station
     puts 'Enter station name'
     station_name = gets.chomp
-    if !stations.detect { |item| item.name == station_name }
-      stations << Station.new(station_name)
-      puts "Station '#{station_name}' was added"
-      display_menu(STATIONS_MENU)
-    else
-      puts 'There is a station with such name. Please, try again.'
-      add_station
-    end
+    Station.new(station_name)
+    puts "Station '#{station_name}' was added"
+    display_menu STATIONS_MENU
+  rescue RuntimeError => e
+    puts e.message
+    puts 'Please, try again.'
+    retry
   end
 
   def show_stations
-    if stations.empty?
+    if Station.all.empty?
       puts 'There is no stations yet. Please, add one.'
     else
       puts 'Select station to view'
-      selected_station = choose_item_from_array(@stations)
+      selected_station = choose_item_from_array(Station.all)
       puts "#{selected_station.name} station, trains: #{selected_station.trains.map(&:name)}"
     end
     display_menu(STATIONS_MENU)
@@ -203,6 +203,10 @@ class App
     @trains << new_train
     puts "#{type.capitalize} train ##{train_number} was added"
     display_menu(TRAINS_MENU)
+  rescue RuntimeError => e
+    puts e.message
+    puts 'Please, try again.'
+    retry
   end
 
   def assign_route_to_train
@@ -255,13 +259,14 @@ class App
   end
 
   def add_route
-    if @stations.size < 2
+    all_stations = Station.all
+    if all_stations.size < 2
       puts 'There are not enough stations to create a route'
     else
       puts 'Select starting station:'
-      starting_station = choose_item_from_array(@stations)
+      starting_station = choose_item_from_array(all_stations)
       puts 'Select ending station:'
-      rest_of_stations = @stations.reject { |item| item == starting_station }
+      rest_of_stations = all_stations.reject { |item| item == starting_station }
       ending_station = choose_item_from_array(rest_of_stations)
       @routes << Route.new(starting_station, ending_station)
       puts "Route '#{starting_station.name} - #{ending_station.name}' was created."
@@ -323,7 +328,7 @@ class App
   end
 
   def add_stations_to_route(route)
-    stations_to_add = @stations - route.stations
+    stations_to_add = Station.all - route.stations
     if stations_to_add.empty?
       puts 'There are no stations to add. Please, create more stations.'
     else
