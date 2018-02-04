@@ -1,4 +1,8 @@
+require_relative 'validation'
+
 class Station
+  include Validation
+
   attr_reader :trains, :name
   @@stations = []
 

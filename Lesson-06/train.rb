@@ -1,9 +1,9 @@
 require_relative 'vendor'
 require_relative 'instance_counter'
+require_relative 'validation'
 
 class Train
-  include Vendor
-  include InstanceCounter
+  include Vendor, InstanceCounter, Validation
 
   attr_reader :speed, :type, :wagons, :number, :route
 
