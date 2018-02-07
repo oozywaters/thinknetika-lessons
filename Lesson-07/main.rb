@@ -46,18 +46,22 @@ class App
     title: 'Edit train',
     items: {
       '1' => {
-          name: 'Assign Route to Train',
-          action: :assign_route_to_train
+        name: 'Assign Route to Train',
+        action: :assign_route_to_train
       },
       '2' => {
-          name: 'Add Wagons to Train',
-          action: :add_wagons_to_train
+        name: 'Add Wagons to Train',
+        action: :add_wagons_to_train
       },
       '3' => {
-          name: 'Remove Wagons from Train',
-          action: :remove_wagons_from_train
+        name: 'Remove Wagons from Train',
+        action: :remove_wagons_from_train
       },
       '4' => {
+        name: 'Edit wagons',
+        action: :edit_wagons,
+      },
+      '5' => {
           name: 'Move Train',
           action: :move_train
       },
@@ -283,7 +287,6 @@ class App
       wagon = CargoWagon.new(gets.chomp.to_f)
     end
     train.add_wagon(wagon)
-    puts 'lsdjflsdfljsldfjsldkjflj'
     puts "#{wagon.name.capitalize} wagon was successfully added to #{train.name} train"
   end
 
@@ -304,6 +307,66 @@ class App
     selected_wagon = choose_item_from_array(train.wagons)
     train.remove_wagon(selected_wagon)
     puts "#{selected_wagon.name.capitalize} wagon was successfully removed from #{train.name} train"
+  end
+
+  def edit_wagons
+    if @trains.empty?
+      puts 'There are no trains yet. Please, add one.'
+    else
+      puts 'Select Train'
+      selected_train = choose_item_from_array(@trains)
+      handle_edit_wagons(selected_train)
+    end
+    display_menu(TRAINS_MENU)
+  end
+
+  def handle_edit_wagons(train)
+    return puts "#{train.name.capitalize} train has no wagons" if train.wagons.empty?
+    puts 'Select wagon to edit'
+    selected_wagon = choose_item_from_array(train.wagons)
+    case selected_wagon.type
+    when 'passenger' then edit_passenger_wagon(selected_wagon)
+    when 'cargo' then edit_cargo_wagon(selected_wagon)
+    else
+      puts "Train type '#{train.type}' is not supported."
+      display_menu(TRAINS_MENU)
+    end
+  end
+
+  def edit_passenger_wagon(wagon)
+    puts "Edit #{wagon.name} wagon"
+    puts '1) Reserve Seat'
+    puts '0) Back To Trains Menu'
+    choice = gets.chomp.to_i
+    case choice
+    when 1
+      wagon.reserve_seat
+      puts 'Seat was successfully reserved.'
+      puts wagon.description
+    when 0 then display_menu(TRAINS_MENU)
+    else
+      puts 'There is no such option. Please, try again'
+      edit_passenger_wagon(wagon)
+    end
+  end
+
+  def edit_cargo_wagon(wagon)
+    puts "Edit #{wagon.name} wagon"
+    puts '1) Fill Wagon'
+    puts '0) Back to Trains Menu'
+    choice = gets.chomp.to_i
+    case choice
+    when 1
+      puts 'Enter volume amount:'
+      amount = gets.chomp.to_f
+      wagon.fill_wagon(amount)
+      puts "Wagon was successfully filled with #{amount} amount"
+      puts wagon.description
+    when 0 then display_menu(TRAINS_MENU)
+    else
+      puts 'There is no such option. Please, try again'
+      edit_cargo_wagon(wagon)
+    end
   end
 
   def add_route
