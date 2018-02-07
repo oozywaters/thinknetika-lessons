@@ -42,6 +42,32 @@ class App
     }
   }
 
+  EDIT_TRAIN_MENU = {
+    title: 'Edit train',
+    items: {
+      '1' => {
+          name: 'Assign Route to Train',
+          action: :assign_route_to_train
+      },
+      '2' => {
+          name: 'Add Wagons to Train',
+          action: :add_wagons_to_train
+      },
+      '3' => {
+          name: 'Remove Wagons from Train',
+          action: :remove_wagons_from_train
+      },
+      '4' => {
+          name: 'Move Train',
+          action: :move_train
+      },
+      '0' => {
+        name: 'Back to Main Menu',
+        action: :display_main_menu
+      }
+    }
+  }
+
   TRAINS_MENU = {
     title: 'Trains Menu',
     items: {
@@ -50,20 +76,13 @@ class App
         action: [:display_menu, ADD_TRAIN_MENU]
       },
       '2' => {
-        name: 'Assign Route to Train',
-        action: :assign_route_to_train
+        name: 'Edit Train',
+        action: [:display_menu, EDIT_TRAIN_MENU]
       },
       '3' => {
-        name: 'Add Wagons to Train',
-        action: :add_wagons_to_train
-      },
-      '4' => {
-        name: 'Remove Wagons from Train',
-        action: :remove_wagons_from_train
-      },
-      '5' => {
-        name: 'Move Train',
-        action: :move_train
+        name: 'Train Info',
+        action: :show_train_info
+        # action: :
       },
       '0' => {
         name: 'Back to Main Menu',
@@ -124,6 +143,7 @@ class App
   def seed
     seed_stations
     seed_routes
+    seed_trains
   end
 
   def seed_stations
@@ -131,9 +151,24 @@ class App
     Station.new('Belorusskaya')
   end
 
+  def seed_trains
+    train1 = PassengerTrain.new('123-12')
+    train2 = CargoTrain.new('154-53')
+    wagon1 = PassengerWagon.new(24)
+    wagon2 = CargoWagon.new(123.54)
+    train1.add_wagon(wagon1)
+    train2.add_wagon(wagon2)
+    train1.set_route(@routes[0])
+    train2.set_route(@routes[1])
+    @trains.push(train1, train2)
+  end
+
   def seed_routes
     stations = Station.all
-    @routes << Route.new(stations[0], stations[1]) if stations.size >= 2
+    if stations.size >= 2
+      @routes << Route.new(stations[0], stations[1])
+      @routes << Route.new(stations[1], stations[0])
+    end
   end
 
   def run
@@ -160,7 +195,9 @@ class App
     else
       puts 'Select station to view'
       selected_station = choose_item_from_array(Station.all)
-      puts "#{selected_station.name} station, trains: #{selected_station.trains.map(&:name)}"
+      puts "#{selected_station.name} station."
+      puts "Has no trains yet." if selected_station.trains.empty?
+      selected_station.each_train { |train| puts train.description }
     end
     display_menu(STATIONS_MENU)
   end
@@ -231,12 +268,23 @@ class App
     else
       puts 'Select Train'
       selected_train = choose_item_from_array(@trains)
-      new_wagon = selected_train.type == 'passenger' ? PassengerWagon.new : CargoWagon.new
-      # new_wagon = Wagon.new(selected_train.type)
-      selected_train.add_wagon(new_wagon)
-      puts "#{new_wagon.name.capitalize} wagon was successfully added to #{selected_train.name} train"
+      handle_add_wagon(selected_train)
     end
     display_menu(TRAINS_MENU)
+  end
+
+  def handle_add_wagon(train)
+    wagon = nil
+    if train.type == 'passenger'
+      puts 'Enter number of seats'
+      wagon = PassengerWagon.new(gets.chomp.to_i)
+    else
+      puts 'Enter wagon volume'
+      wagon = CargoWagon.new(gets.chomp.to_f)
+    end
+    train.add_wagon(wagon)
+    puts 'lsdjflsdfljsldfjsldkjflj'
+    puts "#{wagon.name.capitalize} wagon was successfully added to #{train.name} train"
   end
 
   def remove_wagons_from_train
@@ -272,6 +320,26 @@ class App
       puts "Route '#{starting_station.name} - #{ending_station.name}' was created."
     end
     display_menu(ROUTES_MENU)
+  end
+
+  def show_train_info
+    if @trains.empty?
+      puts 'There are no trains yet. Please, add one.'
+    else
+      puts 'Select Train'
+      selected_train = choose_item_from_array(@trains)
+      handle_show_train_info(selected_train)
+    end
+    display_menu(TRAINS_MENU)
+  end
+
+  def handle_show_train_info(train)
+    if train.wagons.empty?
+      puts "#{train.name.capitalize} has no wagons yet"
+    else
+      puts "#{train.name.capitalize} wagons:"
+      train.each_wagon { |train| puts "#{train.name}" }
+    end
   end
 
   def edit_route

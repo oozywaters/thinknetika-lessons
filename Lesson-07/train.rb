@@ -87,6 +87,10 @@ class Train
     @wagons.each { |wagon| yield wagon } if block_given?
   end
 
+  def description
+    "Train ##{@number}, type '#{@type}', wagons: #{@wagons.length}"
+  end
+
   protected
 
   # нельзя перемещать вагон более чем на одну станцию вперед/назад
