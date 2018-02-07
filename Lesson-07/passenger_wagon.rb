@@ -14,4 +14,8 @@ class PassengerWagon < Wagon
   def occupied_seats
     @seats - @available_seats
   end
+
+  def description
+    "Wagon ##{number}, type: #{type}, available seats: #{available_seats}, occupied seats: #{occupied_seats}"
+  end
 end

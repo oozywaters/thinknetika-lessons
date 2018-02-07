@@ -16,4 +16,8 @@ class CargoWagon < Wagon
   def occupied_space
     @volume - @free_space
   end
+
+  def description
+    "Wagon ##{number}, type: #{type}, free space: #{free_space}, occupied space: #{occupied_space}"
+  end
 end

@@ -338,7 +338,7 @@ class App
       puts "#{train.name.capitalize} has no wagons yet"
     else
       puts "#{train.name.capitalize} wagons:"
-      train.each_wagon { |train| puts "#{train.name}" }
+      train.each_wagon { |wagon| puts wagon.description }
     end
   end
 
