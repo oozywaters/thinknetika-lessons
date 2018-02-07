@@ -83,6 +83,10 @@ class Train
     go_to_station(@current_station_index - 1)
   end
 
+  def each_wagon
+    @wagons.each { |wagon| yield wagon } if block_given?
+  end
+
   protected
 
   # нельзя перемещать вагон более чем на одну станцию вперед/назад
