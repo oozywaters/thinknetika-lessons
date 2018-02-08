@@ -142,6 +142,7 @@ class App
   def initialize
     @routes = []
     @trains = []
+    @wagons = []
   end
   
   def seed
@@ -286,6 +287,7 @@ class App
       puts 'Enter wagon volume'
       wagon = CargoWagon.new(gets.chomp.to_f)
     end
+    @wagons << wagon
     train.add_wagon(wagon)
     puts "#{wagon.name.capitalize} wagon was successfully added to #{train.name} train"
   end
