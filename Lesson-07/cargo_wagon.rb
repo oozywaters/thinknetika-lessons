@@ -4,9 +4,7 @@ class CargoWagon < Wagon
   end
 
   def fill_wagon(volume)
-    return if @free_space.zero?
-    new_volume = @free_space - volume
-    @free_space = new_volume if new_volume >= 0
+    take_space(volume)
   end
 
   def description

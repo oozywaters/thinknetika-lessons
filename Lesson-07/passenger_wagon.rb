@@ -4,7 +4,11 @@ class PassengerWagon < Wagon
   end
 
   def reserve_seat
-    @free_space -= 1 unless @free_space.zero?
+    take_space
+  end
+
+  def take_space
+    super(1)
   end
 
   def description
