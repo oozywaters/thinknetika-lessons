@@ -486,13 +486,11 @@ class App
   def display_menu(menu)
     puts menu[:title]
     menu[:items].each { |item| puts "#{item[0]}) #{item[1][:name]}" }
-    menu_item = menu[:items][gets.chomp]
-    if menu_item && menu_item[:action]
-      send(*menu_item[:action])
-    else
-      puts 'There is no such option. Please, try again.'
-      display_menu(menu)
-    end
+    menu_item = menu[:items].fetch(gets.chomp)
+    send(*menu_item[:action])
+  rescue KeyError
+    puts 'There is no such option. Please, try again.'
+    retry
   end
 
   def display_main_menu
