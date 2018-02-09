@@ -95,6 +95,24 @@ class App
     }
   }
 
+  EDIT_ROUTE_MENU = {
+    title: 'Edit Route Menu',
+    items: {
+      '1' => {
+        name: 'Add Station',
+        action: :add_stations_to_route
+      },
+      '2' => {
+        name: 'Remove Station',
+        action: :remove_stations_from_route
+      },
+      '0' => {
+        name: 'Back to Routes Menu',
+        action: :display_main_menu
+      }
+    }
+  }
+
   ROUTES_MENU = {
     title: 'Routes Menu',
     items: {
@@ -414,23 +432,8 @@ class App
     else
       puts 'Select route to edit'
       selected_route = choose_item_from_array(@routes)
-      display_edit_routes_menu(selected_route)
-    end
-  end
-
-  def display_edit_routes_menu(route)
-    puts 'Select option:'
-    puts '1) Add Station'
-    puts '2) Remove Station'
-    puts '0) Back to Stations Menu'
-    choice = gets.chomp.to_i
-    case choice
-    when 1 then add_stations_to_route(route)
-    when 2 then remove_stations_from_route(route)
-    when 0 then display_menu(STATIONS_MENU)
-    else
-      puts 'There is no such option. Please, try again'
-      display_edit_routes_menu(route)
+      display_menu(EDIT_ROUTE_MENU, route: selected_route)
+      # display_edit_routes_menu(selected_route)
     end
   end
 
@@ -460,7 +463,7 @@ class App
     end
   end
 
-  def add_stations_to_route(route)
+  def add_stations_to_route(route:)
     stations_to_add = Station.all - route.stations
     if stations_to_add.empty?
       puts 'There are no stations to add. Please, create more stations.'
@@ -469,10 +472,10 @@ class App
       route.add_station(selected_station)
       puts "Station #{selected_station.name} was added to '#{route.name}' route"
     end
-    display_menu(ROUTES_MENU)
+    display_menu(EDIT_ROUTE_MENU, route: route)
   end
 
-  def remove_stations_from_route(route)
+  def remove_stations_from_route(route:)
     if route.way_stations.empty?
       puts "There are no stations to remove in '#{route.name}' route"
     else
@@ -480,14 +483,14 @@ class App
       route.remove_station(selected_station)
       puts "Station #{selected_station.name} was removed from '#{route.name}' route"
     end
-    display_menu(ROUTES_MENU)
+    display_menu(EDIT_ROUTE_MENU, route: route)
   end
 
-  def display_menu(menu)
+  def display_menu(menu, *context)
     puts menu[:title]
     menu[:items].each { |item| puts "#{item[0]}) #{item[1][:name]}" }
     menu_item = menu[:items].fetch(gets.chomp)
-    send(*menu_item[:action])
+    send(*menu_item[:action], *context)
   rescue KeyError
     puts 'There is no such option. Please, try again.'
     retry
