@@ -1,26 +1,7 @@
 require_relative 'storage'
+require_relative 'stations_menu'
 
 class App
-  attr_reader :trains
-
-  STATIONS_MENU = {
-    title: 'Stations Menu',
-    items: {
-      '1' => {
-        name: 'Add Station',
-        action: :add_station
-      },
-      '2' => {
-        name: 'Stations List',
-        action: :show_stations
-      },
-      '0' => {
-        name: 'Back to Main Menu',
-        action: :display_main_menu
-      }
-    }
-  }
-
   ADD_TRAIN_MENU = {
     title: 'Choose a Type of Train',
     items: {
@@ -133,7 +114,7 @@ class App
     items: {
       '1' => {
         name: 'Stations',
-        action: [:display_menu, STATIONS_MENU]
+        action: :show_stations_menu
       },
       '2' => {
         name: 'Trains',
@@ -152,6 +133,7 @@ class App
 
   def initialize
     @storage = Storage.new
+    @stations_menu = StationsMenu.new(@storage)
   end
   
   def seed
@@ -164,29 +146,8 @@ class App
 
   private
 
-  def add_station
-    puts 'Enter station name'
-    station_name = gets.chomp
-    @storage.add_station(Station.new(station_name))
-    puts "Station '#{station_name}' was added"
-    display_menu(STATIONS_MENU)
-  rescue RuntimeError => e
-    puts e.message
-    puts 'Please, try again.'
-    retry
-  end
-
-  def show_stations
-    if !@storage.stations?
-      puts 'There is no stations yet. Please, add one.'
-    else
-      puts 'Select station to view'
-      selected_station = choose_item_from_array(@storage.stations)
-      puts "#{selected_station.name} station."
-      puts "Has no trains yet." if selected_station.trains.empty?
-      selected_station.each_train { |train| puts train.description }
-    end
-    display_menu(STATIONS_MENU)
+  def show_stations_menu
+    @stations_menu.display
   end
 
   def handle_move_train(train)
