@@ -1,11 +1,4 @@
-require_relative 'train'
-require_relative 'wagon'
-require_relative 'passenger_train'
-require_relative 'passenger_wagon'
-require_relative 'cargo_train'
-require_relative 'cargo_wagon'
-require_relative 'station'
-require_relative 'route'
+require_relative 'storage'
 
 class App
   attr_reader :trains
@@ -158,40 +151,11 @@ class App
   }
 
   def initialize
-    @routes = []
-    @trains = []
-    @wagons = []
+    @storage = Storage.new
   end
   
   def seed
-    seed_stations
-    seed_routes
-    seed_trains
-  end
-
-  def seed_stations
-    Station.new('Vnukovo')
-    Station.new('Belorusskaya')
-  end
-
-  def seed_trains
-    train1 = PassengerTrain.new('123-12')
-    train2 = CargoTrain.new('154-53')
-    wagon1 = PassengerWagon.new(24)
-    wagon2 = CargoWagon.new(123.54)
-    train1.add_wagon(wagon1)
-    train2.add_wagon(wagon2)
-    train1.set_route(@routes[0])
-    train2.set_route(@routes[1])
-    @trains.push(train1, train2)
-  end
-
-  def seed_routes
-    stations = Station.all
-    if stations.size >= 2
-      @routes << Route.new(stations[0], stations[1])
-      @routes << Route.new(stations[1], stations[0])
-    end
+    @storage.seed
   end
 
   def run
@@ -203,9 +167,9 @@ class App
   def add_station
     puts 'Enter station name'
     station_name = gets.chomp
-    Station.new(station_name)
+    @storage.add_station(Station.new(station_name))
     puts "Station '#{station_name}' was added"
-    display_menu STATIONS_MENU
+    display_menu(STATIONS_MENU)
   rescue RuntimeError => e
     puts e.message
     puts 'Please, try again.'
@@ -213,11 +177,11 @@ class App
   end
 
   def show_stations
-    if Station.all.empty?
+    if !@storage.stations?
       puts 'There is no stations yet. Please, add one.'
     else
       puts 'Select station to view'
-      selected_station = choose_item_from_array(Station.all)
+      selected_station = choose_item_from_array(@storage.stations)
       puts "#{selected_station.name} station."
       puts "Has no trains yet." if selected_station.trains.empty?
       selected_station.each_train { |train| puts train.description }
@@ -232,11 +196,11 @@ class App
   end
 
   def move_train
-    if @trains.empty?
+    if !@storage.trains?
       puts 'There are no trains to move. Please, create one.'
     else
       puts 'Select Train to move'
-      selected_train = choose_item_from_array(@trains)
+      selected_train = choose_item_from_array(@storage.trains)
       handle_move_train(selected_train)
     end
     display_menu(TRAINS_MENU)
@@ -260,7 +224,7 @@ class App
     puts 'Enter Train Number'
     train_number = gets.chomp
     new_train = type == 'cargo' ? CargoTrain.new(train_number) : PassengerTrain.new(train_number)
-    @trains << new_train
+    @storage.add_train(new_train)
     puts "#{type.capitalize} train ##{train_number} was added"
     display_menu(TRAINS_MENU)
   rescue RuntimeError => e
@@ -270,15 +234,15 @@ class App
   end
 
   def assign_route_to_train
-    if @trains.empty?
+    if !@storage.trains?
       puts 'There are no trains yet. Please, add one.'
-    elsif @routes.empty?
+    elsif !@storage.routes?
       puts 'There are no routes to assign yet. Please, add one.'
     else
       puts 'Select Train to Assign Route'
-      selected_train = choose_item_from_array(@trains)
+      selected_train = choose_item_from_array(@storage.trains)
       puts "Selecte Route to Assign #{selected_train.name} Train"
-      selected_route = choose_item_from_array(@routes)
+      selected_route = choose_item_from_array(@storage.routes)
       selected_train.set_route(selected_route)
       puts "#{selected_route.name} Route was successfully Assigned to #{selected_train.name} Train"
     end
@@ -286,36 +250,36 @@ class App
   end
 
   def add_wagons_to_train
-    if @trains.empty?
+    if !@storage.trains?
       puts 'There are no trains yet. Please, add one.'
     else
       puts 'Select Train'
-      selected_train = choose_item_from_array(@trains)
+      selected_train = choose_item_from_array(@storage.trains)
       handle_add_wagon(selected_train)
     end
     display_menu(TRAINS_MENU)
   end
 
   def handle_add_wagon(train)
-    wagon = nil
-    if train.type == 'passenger'
-      puts 'Enter number of seats'
-      wagon = PassengerWagon.new(gets.chomp.to_i)
-    else
-      puts 'Enter wagon volume'
-      wagon = CargoWagon.new(gets.chomp.to_f)
-    end
-    @wagons << wagon
+    wagon =
+      if train.type == 'passenger'
+        puts 'Enter number of seats'
+        PassengerWagon.new(gets.chomp.to_i)
+      else
+        puts 'Enter wagon volume'
+        CargoWagon.new(gets.chomp.to_f)
+      end
+    @storage.add_wagon(wagon)
     train.add_wagon(wagon)
     puts "#{wagon.name.capitalize} wagon was successfully added to #{train.name} train"
   end
 
   def remove_wagons_from_train
-    if @trains.empty?
+    if @storage.trains?
       puts 'There are no trains yet. Please, add one.'
     else
       puts 'Select Train'
-      selected_train = choose_item_from_array(@trains)
+      selected_train = choose_item_from_array(@storage.trains)
       handle_remove_wagons(selected_train)
     end
     display_menu(TRAINS_MENU)
@@ -330,11 +294,11 @@ class App
   end
 
   def edit_wagons
-    if @trains.empty?
+    if @storage.trains?
       puts 'There are no trains yet. Please, add one.'
     else
       puts 'Select Train'
-      selected_train = choose_item_from_array(@trains)
+      selected_train = choose_item_from_array(@storage.trains)
       handle_edit_wagons(selected_train)
     end
     display_menu(TRAINS_MENU)
@@ -390,7 +354,7 @@ class App
   end
 
   def add_route
-    all_stations = Station.all
+    all_stations = @storage.stations
     if all_stations.size < 2
       puts 'There are not enough stations to create a route'
     else
@@ -399,18 +363,18 @@ class App
       puts 'Select ending station:'
       rest_of_stations = all_stations.reject { |item| item == starting_station }
       ending_station = choose_item_from_array(rest_of_stations)
-      @routes << Route.new(starting_station, ending_station)
+      @storage.add_route(Route.new(starting_station, ending_station))
       puts "Route '#{starting_station.name} - #{ending_station.name}' was created."
     end
     display_menu(ROUTES_MENU)
   end
 
   def show_train_info
-    if @trains.empty?
+    if !@storage.trains?
       puts 'There are no trains yet. Please, add one.'
     else
       puts 'Select Train'
-      selected_train = choose_item_from_array(@trains)
+      selected_train = choose_item_from_array(@storage.trains)
       handle_show_train_info(selected_train)
     end
     display_menu(TRAINS_MENU)
@@ -426,24 +390,24 @@ class App
   end
 
   def edit_route
-    if @routes.empty?
+    if !@storage.routes?
       puts 'There are no routes to edit. Please, create one.'
       display_menu(ROUTES_MENU)
     else
       puts 'Select route to edit'
-      selected_route = choose_item_from_array(@routes)
+      selected_route = choose_item_from_array(@storage.routes)
       display_menu(EDIT_ROUTE_MENU, route: selected_route)
       # display_edit_routes_menu(selected_route)
     end
   end
 
   def remove_route
-    if @routes.empty?
+    if !@storage.routes?
       puts 'There are no routes to delete.'
     else
       puts 'Select route to delete:'
-      selected_route = choose_item_from_array(@routes)
-      @routes.delete(selected_route)
+      selected_route = choose_item_from_array(@storage.routes)
+      @storage.delete_route(selected_route)
       puts "Route '#{selected_route.name}' was deleted"
     end
     display_menu(ROUTES_MENU)
@@ -464,7 +428,7 @@ class App
   end
 
   def add_stations_to_route(route:)
-    stations_to_add = Station.all - route.stations
+    stations_to_add = @storage.stations - route.stations
     if stations_to_add.empty?
       puts 'There are no stations to add. Please, create more stations.'
     else
