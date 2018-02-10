@@ -37,6 +37,10 @@ class RouteEditMenu < Menu
   def add_station
     stations_to_add = @storage.stations - route.stations
     return puts 'There are no stations to add. Please, create more stations.' if stations_to_add.empty?
+    handle_add_station(stations_to_add)
+  end
+
+  def handle_add_station(stations_to_add)
     selected_station = choose_item_from_array(stations_to_add)
     route.add_station(selected_station)
     puts "Station #{selected_station.name} was added to '#{route.name}' route"
@@ -44,6 +48,10 @@ class RouteEditMenu < Menu
 
   def remove_stations_from_route
     return puts "There are no stations to remove in '#{route.name}' route" if route.way_stations.empty?
+    handle_remove_station
+  end
+
+  def handle_remove_station
     selected_station = choose_item_from_array(route.way_stations)
     route.remove_station(selected_station)
     puts "Station #{selected_station.name} was removed from '#{route.name}' route"
@@ -81,13 +89,18 @@ class RoutesMenu < Menu
 
   def add_route
     return puts 'There are not enough stations to create a route' if @storage.stations.size < 2
+    s1, s2 = select_stations_for_route
+    @storage.add_route(Route.new(s1, s2))
+    puts "Route '#{s1.name} - #{s2.name}' was created."
+  end
+
+  def select_stations_for_route
     puts 'Select Starting Station:'
     starting_station = choose_item_from_array(@storage.stations)
     puts 'Select Ending Station:'
     rest_of_stations = @storage.stations.reject { |item| item == starting_station }
     ending_station = choose_item_from_array(rest_of_stations)
-    @storage.add_route(Route.new(starting_station, ending_station))
-    puts "Route '#{starting_station.name} - #{ending_station.name}' was created."
+    [starting_station, ending_station]
   end
 
   def edit_route

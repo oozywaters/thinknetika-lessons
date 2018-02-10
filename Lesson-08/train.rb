@@ -12,7 +12,9 @@ class Train
 
   NUMBER_FORMAT = /^[a-z0-9]{3}-?[a-z0-9]{2}$/i
 
+  # rubocop: disable Style/ClassVars
   @@trains = {}
+  # rubocop: enable Style/ClassVars
 
   def self.find(number)
     @@trains[number]
@@ -63,19 +65,20 @@ class Train
   end
 
   def stations
-    @route.stations if @route
+    return unless @route
+    @route.stations
   end
 
   def previous_station
-    @route.stations[@current_station_index - 1] if @route && @current_station_index != 0
+    stations[@current_station_index - 1] && @current_station_index != 0
   end
 
   def next_station
-    @route.stations[@current_station_index + 1] if @route
+    stations[@current_station_index + 1]
   end
 
   def current_station
-    @route.stations[@current_station_index] if @route
+    stations[@current_station_index]
   end
 
   def go_to_next_station

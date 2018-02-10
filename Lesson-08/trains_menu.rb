@@ -157,6 +157,7 @@ class EditTrainMenu < Menu
     "Edit Train #{train.name}"
   end
 
+  # rubocop:disable Metrics/MethodLength
   def items
     {
       '1' => {
@@ -173,7 +174,7 @@ class EditTrainMenu < Menu
       },
       '4' => {
         name: 'Edit wagons',
-        action: :edit_wagons,
+        action: :edit_wagon
       },
       '5' => {
         name: 'Move Train',
@@ -185,6 +186,7 @@ class EditTrainMenu < Menu
       }
     }
   end
+  # rubocop:enable Metrics/MethodLength
 
   def train
     @context[:train]
@@ -192,6 +194,14 @@ class EditTrainMenu < Menu
 
   def display
     super if train
+  end
+
+  def passenger?
+    train.type == 'passenger'
+  end
+
+  def cargo?
+    train.type == 'cargo'
   end
 
   private
@@ -203,33 +213,45 @@ class EditTrainMenu < Menu
     puts "#{train.route.name} Route was successfully Assigned to #{train.name} Train"
   end
 
+  def create_wagon
+    if passenger?
+      puts 'Enter Number of Seats:'
+      PassengerWagon.new(gets.chomp.to_i)
+    elsif cargo?
+      puts 'Enter Wagon Volume:'
+      CargoWagon.new(gets.chomp.to_f)
+    end
+  end
+
   def add_wagon
-    wagon =
-      if train.type == 'passenger'
-        puts 'Enter number of seats:'
-        PassengerWagon.new(gets.chomp.to_i)
-      else
-        puts 'Enter wagon volume:'
-        CargoWagon.new(gets.chomp.to_f)
-      end
+    wagon = create_wagon
     @storage.add_wagon(wagon)
     train.add_wagon(wagon)
     puts "#{wagon.name.capitalize} wagon was successfully added to #{train.name} train"
   end
 
-  def remove_wagon
+  def select_wagon
     return puts "#{train.name.capitalize} train has no wagons" if train.wagons.empty?
-    puts 'Select Wagon to Remove'
-    selected_wagon = choose_item_from_array(train.wagons)
-    train.remove_wagon(selected_wagon)
-    puts "#{selected_wagon.name.capitalize} wagon was successfully removed from #{train.name} train"
+    puts 'Select Wagon:'
+    wagon = choose_item_from_array(train.wagons)
+    yield(wagon) if block_given?
   end
 
-  def edit_wagons
-    return puts "#{train.name.capitalize} train has no wagons" if train.wagons.empty?
-    puts 'Select wagon to edit'
-    selected_wagon = choose_item_from_array(train.wagons)
-    EditWagonMenu.new(@storage, wagon: selected_wagon).display
+  def remove_wagon
+    select_wagon { |wagon| handle_remove_wagon(wagon) }
+  end
+
+  def edit_wagon
+    select_wagon { |wagon| handle_edit_wagon(wagon) }
+  end
+
+  def handle_remove_wagon(wagon)
+    train.remove_wagon(wagon)
+    puts "#{wagon.name.capitalize} wagon was successfully removed from #{train.name} train"
+  end
+
+  def handle_edit_wagon(wagon)
+    EditWagonMenu.new(@storage, wagon: wagon).display
   end
 
   def move_train

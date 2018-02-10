@@ -29,14 +29,13 @@ class Menu
     puts title
     items.each { |key, value| puts "#{key}) #{value[:name]}" }
     handle_user_input
-  rescue KeyError
-    puts 'There is no such option. Please, try again.'
-    retry
   end
 
   def handle_user_input
     menu_item = items.fetch(gets.chomp)
     send(*menu_item[:action])
+  rescue KeyError
+    puts 'There is no such option. Please, try again.'
   end
 
   def choose_item_from_array(items)

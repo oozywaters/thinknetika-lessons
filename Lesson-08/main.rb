@@ -50,7 +50,7 @@ class App < Menu
     puts 'See ya!!'
   end
 
-  alias_method :run, :display
+  alias run display
 end
 
 storage = Storage.new

@@ -5,7 +5,10 @@ class Station
   include Validation
 
   attr_reader :trains, :name
+
+  # rubocop: disable Style/ClassVars
   @@stations = []
+  # rubocop: enable Style/ClassVars
 
   NAME_FORMAT = /^[\S0-9a-z]+$/i
 
