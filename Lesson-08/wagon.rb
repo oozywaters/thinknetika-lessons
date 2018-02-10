@@ -18,8 +18,7 @@ class Wagon
 
   def take_space(amount)
     return if @free_space.zero?
-    new_space = @free_space - amount
-    @free_space = new_space if new_space >= 0
+    @free_space -= amount if @free_space >= amount
   end
 
   def occupied_space
