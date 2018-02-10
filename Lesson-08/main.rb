@@ -1,8 +1,9 @@
+require_relative 'menu'
 require_relative 'storage'
 require_relative 'stations_menu'
 require_relative 'trains_menu'
 
-class App
+class App < Menu
   EDIT_TRAIN_MENU = {
     title: 'Edit train',
     items: {
@@ -73,9 +74,12 @@ class App
     }
   }
 
-  MAIN_MENU = {
-    title: 'Main Menu',
-    items: {
+  def title
+    'Main Menu'
+  end
+
+  def items
+    {
       '1' => {
         name: 'Stations',
         action: :show_stations_menu
@@ -90,21 +94,13 @@ class App
       },
       '0' => {
         name: 'Exit',
-        action: :exit
+        action: :close!
       }
     }
-  }
-
-  def initialize
-    @storage = Storage.new
-  end
-  
-  def seed
-    @storage.seed
   end
 
   def run
-    display_main_menu
+    display
   end
 
   private
@@ -292,7 +288,6 @@ class App
       puts 'Select route to edit'
       selected_route = choose_item_from_array(@storage.routes)
       display_menu(EDIT_ROUTE_MENU, route: selected_route)
-      # display_edit_routes_menu(selected_route)
     end
   end
 
@@ -306,20 +301,6 @@ class App
       puts "Route '#{selected_route.name}' was deleted"
     end
     display_menu(ROUTES_MENU)
-  end
-
-  def choose_item_from_array(items)
-    return unless items.is_a?(Array) && !items.empty?
-    items.each_with_index do |item, index|
-      puts "#{index + 1}) #{item.name}" if item.class.method_defined? :name
-    end
-    selected_item = items[gets.chomp.to_i - 1]
-    if !selected_item
-      puts 'There is no such option. Please, try again.'
-      choose_item_from_array(items)
-    else
-      selected_item
-    end
   end
 
   def add_stations_to_route(route:)
@@ -345,25 +326,13 @@ class App
     display_menu(EDIT_ROUTE_MENU, route: route)
   end
 
-  def display_menu(menu, *context)
-    puts menu[:title]
-    menu[:items].each { |item| puts "#{item[0]}) #{item[1][:name]}" }
-    menu_item = menu[:items].fetch(gets.chomp)
-    send(*menu_item[:action], *context)
-  rescue KeyError
-    puts 'There is no such option. Please, try again.'
-    retry
-  end
-
-  def display_main_menu
-    display_menu(MAIN_MENU)
-  end
-
-  def exit
+  def close!
+    super
     puts 'See ya!!'
   end
 end
 
-my_app = App.new
-my_app.seed
+storage = Storage.new
+storage.seed
+my_app = App.new(storage)
 my_app.run

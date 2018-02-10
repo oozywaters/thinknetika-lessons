@@ -26,6 +26,8 @@ class Menu
     retry
   end
 
+  protected
+
   def close!
     @close = true
   end
