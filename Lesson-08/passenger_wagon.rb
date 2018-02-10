@@ -1,6 +1,7 @@
+# PassengerWagon can be attached to passenger trains
 class PassengerWagon < Wagon
   def initialize(seats)
-    super('passenger', seats)
+    super(seats, 'passenger')
   end
 
   def take_space
@@ -8,7 +9,8 @@ class PassengerWagon < Wagon
   end
 
   def description
-    "#{super}, available seats: #{free_space}, occupied seats: #{occupied_space}"
+    "#{super}, available seats: #{free_space},
+ occupied seats: #{occupied_space}"
   end
 
   alias reserve_seat take_space

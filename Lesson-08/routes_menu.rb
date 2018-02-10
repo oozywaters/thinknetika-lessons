@@ -1,6 +1,7 @@
 require_relative 'menu'
 require_relative 'route'
 
+# Route editing menu
 class RouteEditMenu < Menu
   def title
     "Edit Route '#{route.name}'"
@@ -49,6 +50,7 @@ class RouteEditMenu < Menu
   end
 end
 
+# Main routes menu
 class RoutesMenu < Menu
   def title
     'Routes Menu'

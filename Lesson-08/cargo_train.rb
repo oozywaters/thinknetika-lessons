@@ -1,3 +1,4 @@
+# CargoTrain Class accepts only cargo wagons
 class CargoTrain < Train
   def initialize(number)
     super(number, 'cargo')

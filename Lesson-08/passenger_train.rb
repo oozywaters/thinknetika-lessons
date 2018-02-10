@@ -1,3 +1,4 @@
+# PassengerTrain accepts only passenger wagons
 class PassengerTrain < Train
   def initialize(number)
     super(number, 'passenger')

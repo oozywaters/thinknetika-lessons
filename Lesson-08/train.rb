@@ -2,8 +2,11 @@ require_relative 'vendor'
 require_relative 'instance_counter'
 require_relative 'validation'
 
+# Parent Class for all types of trains
 class Train
-  include Vendor, InstanceCounter, Validation
+  include Vendor
+  include InstanceCounter
+  include Validation
 
   attr_reader :speed, :type, :wagons, :number, :route
 
@@ -52,7 +55,7 @@ class Train
     @wagons.delete(wagon)
   end
 
-  def set_route(route)
+  def route=(route)
     return unless route.is_a? Route
     current_station.send_train(self) if @route
     @route = route
@@ -93,7 +96,6 @@ class Train
 
   protected
 
-  # нельзя перемещать вагон более чем на одну станцию вперед/назад
   def go_to_station(index)
     return unless stations && stations[index] && index >= 0
     current_station.send_train(self)

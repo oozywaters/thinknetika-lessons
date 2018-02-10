@@ -7,6 +7,7 @@ require_relative 'cargo_wagon'
 require_relative 'route'
 require_relative 'Station'
 
+# Data Storage
 class Storage
   attr_reader :stations, :routes, :trains, :wagons
 
@@ -35,8 +36,8 @@ class Storage
     wagon2 = CargoWagon.new(123.54)
     train1.add_wagon(wagon1)
     train2.add_wagon(wagon2)
-    train1.set_route(@routes[0])
-    train2.set_route(@routes[1])
+    train1.route = @routes[0]
+    train2.route = @routes[1]
     @trains.push(train1, train2)
   end
 

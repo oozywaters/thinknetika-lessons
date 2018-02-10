@@ -1,5 +1,6 @@
 require_relative 'validation'
 
+# Route Class represents train's route
 class Route
   include Validation
 
@@ -19,20 +20,20 @@ class Route
   end
 
   def add_station(station)
-    @stations.insert(-2, station);
+    @stations.insert(-2, station)
   end
 
   def remove_station(station)
-    station_index = @stations.index(station)
     # Can't remove staring and ending stations
-    @stations.delete(station) if station_index != @stations.size - 1 && station_index != 0
+    @stations.delete(station) if way_stations.include(station)
   end
 
   protected
 
   def validate!
     @stations.each_with_index do |item, index|
-      raise "The station ##{index + 1} is not an object of Station class" unless item.is_a? Station
+      next if item.is_a?(Station)
+      raise "The station ##{index + 1} is not an object of Station class"
     end
     true
   end

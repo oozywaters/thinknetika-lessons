@@ -1,6 +1,7 @@
+# CargoWagon can be attached to trains of 'cargo' type
 class CargoWagon < Wagon
   def initialize(volume)
-    super('cargo', volume)
+    super(volume, 'cargo')
   end
 
   def description

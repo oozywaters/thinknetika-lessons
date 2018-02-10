@@ -1,9 +1,11 @@
+# Counts instances :)
 module InstanceCounter
   def self.included(base)
     base.extend ClassMethods
     base.send :include, InstanceMethods
   end
 
+  # Instance methods and variables
   module InstanceMethods
     private
 
@@ -12,6 +14,7 @@ module InstanceCounter
     end
   end
 
+  # Class methods
   module ClassMethods
     attr_reader :instances
 

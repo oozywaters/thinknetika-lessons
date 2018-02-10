@@ -4,6 +4,7 @@ require_relative 'stations_menu'
 require_relative 'trains_menu'
 require_relative 'routes_menu'
 
+# Main App class
 class App < Menu
   def title
     'Main Menu'
@@ -54,5 +55,4 @@ end
 
 storage = Storage.new
 storage.seed
-my_app = App.new(storage)
-my_app.run
+App.new(storage).run

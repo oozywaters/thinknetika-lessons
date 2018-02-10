@@ -1,11 +1,12 @@
 require_relative 'vendor'
 
+# Parent Class for all types of wagons
 class Wagon
   include Vendor
 
   attr_reader :type, :number, :space, :free_space
 
-  def initialize(type = 'passenger', space)
+  def initialize(space, type = 'passenger')
     @type = type
     @number = Array.new(5) { rand(36).to_s(36) }.join
     @space = space

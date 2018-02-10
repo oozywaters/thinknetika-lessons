@@ -1,5 +1,6 @@
 require_relative 'menu'
 
+# Main stations menu
 class StationsMenu < Menu
   def title
     'Stations Menu'
@@ -38,7 +39,7 @@ class StationsMenu < Menu
     puts 'Select station to view'
     selected_station = choose_item_from_array(@storage.stations)
     puts "#{selected_station.name} station."
-    puts "Has no trains yet." if selected_station.trains.empty?
+    puts 'Has no trains yet.' if selected_station.trains.empty?
     selected_station.each_train { |train| puts train.description }
   end
 end

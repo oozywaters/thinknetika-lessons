@@ -1,5 +1,6 @@
 require_relative 'validation'
 
+# Stations accept and send trains
 class Station
   include Validation
 

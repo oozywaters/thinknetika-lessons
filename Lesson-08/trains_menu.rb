@@ -2,6 +2,7 @@ require_relative 'menu'
 require_relative 'cargo_train'
 require_relative 'cargo_wagon'
 
+# Wagon editing menu
 class EditWagonMenu < Menu
   def title
     "Edit #{wagon.name} wagon"
@@ -67,6 +68,7 @@ class EditWagonMenu < Menu
   end
 end
 
+# Train destination menu
 class MoveTrainMenu < Menu
   def title
     "Select #{train.name} destination"
@@ -110,6 +112,7 @@ class MoveTrainMenu < Menu
   end
 end
 
+# Train creation menu
 class AddTrainMenu < Menu
   def title
     'What Type of Train Do You Want to Add?'
@@ -148,6 +151,7 @@ class AddTrainMenu < Menu
   end
 end
 
+# Train Editing Menu
 class EditTrainMenu < Menu
   def title
     "Edit Train #{train.name}"
@@ -195,9 +199,8 @@ class EditTrainMenu < Menu
   def assign_route
     return puts 'There are no routes to assign yet. Please, add one.' unless @storage.routes?
     puts "Selecte Route to Assign #{train.name} Train"
-    route = choose_item_from_array(@storage.routes)
-    train.set_route(route)
-    puts "#{route.name} Route was successfully Assigned to #{train.name} Train"
+    train.route = choose_item_from_array(@storage.routes)
+    puts "#{train.route.name} Route was successfully Assigned to #{train.name} Train"
   end
 
   def add_wagon
@@ -235,6 +238,7 @@ class EditTrainMenu < Menu
   end
 end
 
+# Main Trains Menu
 class TrainsMenu < Menu
   def title
     'Trains Menu'

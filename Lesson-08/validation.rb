@@ -1,3 +1,4 @@
+# Validation methods module
 module Validation
   def valid?
     validate!
