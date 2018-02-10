@@ -94,7 +94,7 @@ class TrainsMenu < Menu
       },
       '0' => {
         name: 'Back to Main Menu',
-        action: :display_main_menu
+        action: :close!
       }
     }
   end
@@ -108,22 +108,15 @@ class TrainsMenu < Menu
   end
 
   def show_train_info
-    if @storage.trains?
-      puts 'Select Train'
-      selected_train = choose_item_from_array(@storage.trains)
-      handle_show_train_info(selected_train)
-    else
-      puts 'There are no trains yet. Please, add one.'
-    end
-    display
+    return puts 'There are no trains yet. Please, add one.' unless @storage.trains?
+    puts 'Select Train'
+    selected_train = choose_item_from_array(@storage.trains)
+    handle_show_train_info(selected_train)
   end
 
   def handle_show_train_info(train)
-    if train.wagons.empty?
-      puts "#{train.name.capitalize} has no wagons yet"
-    else
-      puts "#{train.name.capitalize} wagons:"
-      train.each_wagon { |wagon| puts wagon.description }
-    end
+    return puts "#{train.name.capitalize} has no wagons yet" if train.wagons.empty?
+    puts "#{train.name.capitalize} wagons:"
+    train.each_wagon { |wagon| puts wagon.description }
   end
 end
