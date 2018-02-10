@@ -17,7 +17,7 @@ class StationsMenu < Menu
       },
       '0' => {
         name: 'Back to Main Menu',
-        action: :display_main_menu
+        action: :close!
       }
     }
   end
@@ -27,7 +27,6 @@ class StationsMenu < Menu
     station_name = gets.chomp
     @storage.add_station(Station.new(station_name))
     puts "Station '#{station_name}' was added"
-    display
   rescue RuntimeError => e
     puts e.message
     puts 'Please, try again.'
@@ -35,15 +34,11 @@ class StationsMenu < Menu
   end
 
   def show_stations
-    if @storage.stations?
-      puts 'Select station to view'
-      selected_station = choose_item_from_array(@storage.stations)
-      puts "#{selected_station.name} station."
-      puts "Has no trains yet." if selected_station.trains.empty?
-      selected_station.each_train { |train| puts train.description }
-    else
-      puts 'There is no stations yet. Please, add one.'
-    end
-    display
+    return puts 'There is no stations yet. Please, add one.' unless @storage.stations?
+    puts 'Select station to view'
+    selected_station = choose_item_from_array(@storage.stations)
+    puts "#{selected_station.name} station."
+    puts "Has no trains yet." if selected_station.trains.empty?
+    selected_station.each_train { |train| puts train.description }
   end
 end

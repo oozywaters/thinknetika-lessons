@@ -19,7 +19,7 @@ class AddTrainMenu < Menu
       },
       '0' => {
         name: 'Cancel',
-        action: :go_back
+        action: :close!
       }
     }
   end
@@ -30,7 +30,7 @@ class AddTrainMenu < Menu
     new_train = type == 'cargo' ? CargoTrain.new(train_number) : PassengerTrain.new(train_number)
     @storage.add_train(new_train)
     puts "#{type.capitalize} train ##{train_number} was added"
-    go_back
+    close!
   rescue RuntimeError => e
     puts e.message
     puts 'Please, try again.'
@@ -67,7 +67,7 @@ class EditTrainMenu < Menu
       },
       '0' => {
         name: 'Back to Main Menu',
-        action: :display_main_menu
+        action: :close!
       }
     }
   end
@@ -100,11 +100,11 @@ class TrainsMenu < Menu
   end
 
   def add_train
-    AddTrainMenu.new(@storage, parent: self).display
+    AddTrainMenu.new(@storage).display
   end
 
   def edit_train
-    EditTrainMenu.new(@storage, parent: self).display
+    EditTrainMenu.new(@storage).display
   end
 
   def show_train_info

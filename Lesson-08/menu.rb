@@ -2,6 +2,7 @@ class Menu
   def initialize(storage, context = {})
     @storage = storage
     @context = context
+    @close = false
   end
 
   def title
@@ -13,18 +14,20 @@ class Menu
   end
 
   def display
-    puts title
     return if items.empty?
-    items.each { |item| puts "#{item[0]}) #{item[1][:name]}" }
-    menu_item = items.fetch(gets.chomp)
-    send(*menu_item[:action])
+    until @close
+      puts title
+      items.each { |item| puts "#{item[0]}) #{item[1][:name]}" }
+      menu_item = items.fetch(gets.chomp)
+      send(*menu_item[:action])
+    end
   rescue KeyError
     puts 'There is no such option. Please, try again.'
     retry
   end
 
-  def go_back
-    @context[:parent].display
+  def close!
+    @close = true
   end
 
   def choose_item_from_array(items)
