@@ -1,21 +1,8 @@
 require_relative 'storage'
 require_relative 'stations_menu'
+require_relative 'trains_menu'
 
 class App
-  ADD_TRAIN_MENU = {
-    title: 'Choose a Type of Train',
-    items: {
-      '1' => {
-        name: 'Passenger',
-        action: [:add_train, 'passenger']
-      },
-      '2' => {
-        name: 'Cargo',
-        action: [:add_train, 'cargo']
-      }
-    }
-  }
-
   EDIT_TRAIN_MENU = {
     title: 'Edit train',
     items: {
@@ -38,29 +25,6 @@ class App
       '5' => {
           name: 'Move Train',
           action: :move_train
-      },
-      '0' => {
-        name: 'Back to Main Menu',
-        action: :display_main_menu
-      }
-    }
-  }
-
-  TRAINS_MENU = {
-    title: 'Trains Menu',
-    items: {
-      '1' => {
-        name: 'Add Train',
-        action: [:display_menu, ADD_TRAIN_MENU]
-      },
-      '2' => {
-        name: 'Edit Train',
-        action: [:display_menu, EDIT_TRAIN_MENU]
-      },
-      '3' => {
-        name: 'Train Info',
-        action: :show_train_info
-        # action: :
       },
       '0' => {
         name: 'Back to Main Menu',
@@ -118,7 +82,7 @@ class App
       },
       '2' => {
         name: 'Trains',
-        action: [:display_menu, TRAINS_MENU]
+        action: :show_trains_menu
       },
       '3' => {
         name: 'Routes',
@@ -133,7 +97,6 @@ class App
 
   def initialize
     @storage = Storage.new
-    @stations_menu = StationsMenu.new(@storage)
   end
   
   def seed
@@ -147,7 +110,11 @@ class App
   private
 
   def show_stations_menu
-    @stations_menu.display
+    StationsMenu.new(@storage).display
+  end
+
+  def show_trains_menu
+    TrainsMenu.new(@storage).display
   end
 
   def handle_move_train(train)
@@ -179,19 +146,6 @@ class App
       puts 'There is no such option. Please, try again'
       select_train_destination(train)
     end
-  end
-
-  def add_train(type)
-    puts 'Enter Train Number'
-    train_number = gets.chomp
-    new_train = type == 'cargo' ? CargoTrain.new(train_number) : PassengerTrain.new(train_number)
-    @storage.add_train(new_train)
-    puts "#{type.capitalize} train ##{train_number} was added"
-    display_menu(TRAINS_MENU)
-  rescue RuntimeError => e
-    puts e.message
-    puts 'Please, try again.'
-    retry
   end
 
   def assign_route_to_train
@@ -328,26 +282,6 @@ class App
       puts "Route '#{starting_station.name} - #{ending_station.name}' was created."
     end
     display_menu(ROUTES_MENU)
-  end
-
-  def show_train_info
-    if !@storage.trains?
-      puts 'There are no trains yet. Please, add one.'
-    else
-      puts 'Select Train'
-      selected_train = choose_item_from_array(@storage.trains)
-      handle_show_train_info(selected_train)
-    end
-    display_menu(TRAINS_MENU)
-  end
-
-  def handle_show_train_info(train)
-    if train.wagons.empty?
-      puts "#{train.name.capitalize} has no wagons yet"
-    else
-      puts "#{train.name.capitalize} wagons:"
-      train.each_wagon { |wagon| puts wagon.description }
-    end
   end
 
   def edit_route
