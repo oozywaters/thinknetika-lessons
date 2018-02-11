@@ -24,4 +24,4 @@ module Accessors
       end
     end
   end
-endg
+end
