@@ -19,7 +19,6 @@ module Validation
     private
 
     def include_validation
-      puts 'Including validation'
       include(InstanceMethods)
       class_variable_set(:@@__validations, {})
     end
@@ -27,6 +26,27 @@ module Validation
     def validation_included?
       ancestors.include?(InstanceMethods)
     end
+  end
+
+  # Instance methods for validation module
+  module InstanceMethods
+    def validate!
+      self.class.__validations.each do |validator, attributes|
+        attributes.each do |attr_name, params|
+          var = instance_variable_get("@#{attr_name}")
+          validator_method = "validate_#{validator}".to_sym
+          send(validator_method, attr_name, var, *params)
+        end
+      end
+    end
+
+    def valid?
+      validate!
+    rescue RuntimeError
+      false
+    end
+
+    private
 
     def validate_presence(attr, value)
       raise "'#{attr}' attribute has no value" if value.nil? || value.empty?
@@ -44,25 +64,6 @@ module Validation
           !value.is_a?(type)
         end
       raise "'#{attr}' has wrong type (#{type} expected)" if mismatch
-    end
-  end
-
-  # Instance methods for validation module
-  module InstanceMethods
-    def validate!
-      self.class.__validations.each do |validator, attributes|
-        attributes.each do |attr_name, params|
-          var = instance_variable_get("@#{attr_name}")
-          validator_method = "validate_#{validator}".to_sym
-          self.class.send(validator_method, attr_name, var, *params)
-        end
-      end
-    end
-
-    def valid?
-      validate!
-    rescue RuntimeError
-      false
     end
   end
 end
