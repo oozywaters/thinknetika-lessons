@@ -8,8 +8,6 @@ class Train
   include InstanceCounter
   include Validation
 
-  @hello = 'lskdjf'
-
   NUMBER_FORMAT = /^[a-z0-9]{3}-?[a-z0-9]{2}$/i
 
   attr_reader :speed, :type, :wagons, :number, :route

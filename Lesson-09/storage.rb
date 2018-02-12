@@ -5,7 +5,7 @@ require_relative 'passenger_wagon'
 require_relative 'cargo_train'
 require_relative 'cargo_wagon'
 require_relative 'route'
-require_relative 'Station'
+require_relative 'station'
 
 # Data Storage
 class Storage
